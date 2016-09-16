@@ -10,97 +10,97 @@ import {
 var assert = require('chai').assert;
 var expect = require('chai').expect;
 
-var prebid = require('src/prebid');
-var utils = require('src/utils');
-var bidmanager = require('src/bidmanager');
-var adloader = require('src/adloader');
-var adaptermanager = require('src/adaptermanager');
-var events = require('src/events');
-var adserver = require('src/adserver');
-var CONSTANTS = require('src/constants.json');
+describe('Unit: Prebid Module', function () {
 
-var config = require('test/fixtures/config.json');
+  var prebid = require('src/prebid');
+  var utils = require('src/utils');
+  var bidmanager = require('src/bidmanager');
+  var adloader = require('src/adloader');
+  var adaptermanager = require('src/adaptermanager');
+  var events = require('src/events');
+  var adserver = require('src/adserver');
+  var CONSTANTS = require('src/constants.json');
 
-$$PREBID_GLOBAL$$ = $$PREBID_GLOBAL$$ || {};
-$$PREBID_GLOBAL$$._bidsRequested = getBidRequests();
-$$PREBID_GLOBAL$$._bidsReceived = getBidResponses();
+  var config = require('test/fixtures/config.json');
 
-function resetAuction() {
-  $$PREBID_GLOBAL$$._sendAllBids = false;
-  $$PREBID_GLOBAL$$.clearAuction();
+  $$PREBID_GLOBAL$$ = $$PREBID_GLOBAL$$ || {};
   $$PREBID_GLOBAL$$._bidsRequested = getBidRequests();
   $$PREBID_GLOBAL$$._bidsReceived = getBidResponses();
-}
 
-var Slot = function Slot(elementId, pathId) {
-  var slot = {
-    targeting: [],
-    getSlotElementId: function getSlotElementId() {
-      return elementId;
-    },
+  function resetAuction() {
+    $$PREBID_GLOBAL$$._sendAllBids = false;
+    $$PREBID_GLOBAL$$.clearAuction();
+    $$PREBID_GLOBAL$$._bidsRequested = getBidRequests();
+    $$PREBID_GLOBAL$$._bidsReceived = getBidResponses();
+  }
 
-    getAdUnitPath: function getAdUnitPath() {
-      return pathId;
-    },
-
-    setTargeting: function setTargeting(key, value) {
-      var obj = [];
-      obj[key] = value;
-      this.targeting.push(obj);
-    },
-
-    getTargeting: function getTargeting() {
-      return this.targeting;
-    },
-
-    getTargetingKeys: function getTargetingKeys() {
-      return [];
-    },
-
-    clearTargeting: function clearTargeting() {
-      return googletag.pubads().getSlots();
-    }
-  };
-  slot.spySetTargeting = sinon.spy(slot, 'setTargeting');
-  return slot;
-};
-
-var createSlotArray = function createSlotArray() {
-  return [
-    new Slot(config.adUnitElementIDs[0], config.adUnitCodes[0]),
-    new Slot(config.adUnitElementIDs[1], config.adUnitCodes[1]),
-    new Slot(config.adUnitElementIDs[2], config.adUnitCodes[2])
-  ];
-};
-
-var createSlotArrayScenario2 = function createSlotArrayScenario2() {
-  var slot1 = new Slot(config.adUnitElementIDs[0], config.adUnitCodes[0]);
-  slot1.setTargeting('pos1', '750x350');
-  var slot2 = new Slot(config.adUnitElementIDs[1], config.adUnitCodes[0]);
-  slot2.setTargeting('gender', ['male', 'female']);
-  return [
-    slot1,
-    slot2
-  ];
-};
-
-window.googletag = {
-  _slots: [],
-  pubads: function () {
-    var self = this;
-    return {
-      getSlots: function () {
-        return self._slots;
+  var Slot = function Slot(elementId, pathId) {
+    var slot = {
+      targeting: [],
+      getSlotElementId: function getSlotElementId() {
+        return elementId;
       },
 
-      setSlots: function (slots) {
-        self._slots = slots;
+      getAdUnitPath: function getAdUnitPath() {
+        return pathId;
+      },
+
+      setTargeting: function setTargeting(key, value) {
+        var obj = [];
+        obj[key] = value;
+        this.targeting.push(obj);
+      },
+
+      getTargeting: function getTargeting() {
+        return this.targeting;
+      },
+
+      getTargetingKeys: function getTargetingKeys() {
+        return [];
+      },
+
+      clearTargeting: function clearTargeting() {
+        return googletag.pubads().getSlots();
       }
     };
-  }
-};
+    slot.spySetTargeting = sinon.spy(slot, 'setTargeting');
+    return slot;
+  };
 
-describe('Unit: Prebid Module', function () {
+  var createSlotArray = function createSlotArray() {
+    return [
+      new Slot(config.adUnitElementIDs[0], config.adUnitCodes[0]),
+      new Slot(config.adUnitElementIDs[1], config.adUnitCodes[1]),
+      new Slot(config.adUnitElementIDs[2], config.adUnitCodes[2])
+    ];
+  };
+
+  var createSlotArrayScenario2 = function createSlotArrayScenario2() {
+    var slot1 = new Slot(config.adUnitElementIDs[0], config.adUnitCodes[0]);
+    slot1.setTargeting('pos1', '750x350');
+    var slot2 = new Slot(config.adUnitElementIDs[1], config.adUnitCodes[0]);
+    slot2.setTargeting('gender', ['male', 'female']);
+    return [
+      slot1,
+      slot2
+    ];
+  };
+
+  window.googletag = {
+    _slots: [],
+    pubads: function () {
+      var self = this;
+      return {
+        getSlots: function () {
+          return self._slots;
+        },
+
+        setSlots: function (slots) {
+          self._slots = slots;
+        }
+      };
+    }
+  };
 
   describe('getAdserverTargetingForAdUnitCodeStr', function () {
     it('should return targeting info as a string', function () {
