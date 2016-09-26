@@ -68,8 +68,13 @@ SpringServeAdapter = function SpringServeAdapter() {
       //look up the request attributs stored in the bidmanager
       var responseBid = responseObj.seatbid[0].bid[0];
       //var requestObj = bidmanager.getPlacementIdByCBIdentifer(responseBid.impid);
-      var requestBids = $$PREBID_GLOBAL$$._bidsRequested.find(bidSet => bidSet.bidderCode === 'springserve').bids
-        .filter(bid => bid.params && bid.params.impId === +responseBid.impid);
+      var requestBids;
+      try {
+        requestBids = $$PREBID_GLOBAL$$._bidsRequested.find(bidSet => bidSet.bidderCode === 'springserve').bids
+          .filter(bid => bid.params && bid.params.impId === +responseBid.impid);
+      } catch (error) {
+        requestBids = [];
+      }
       var bid = bidfactory.createBid(1);
       var placementCode;
 
@@ -84,7 +89,9 @@ SpringServeAdapter = function SpringServeAdapter() {
         }
       }
 
-      bid.bidderCode = requestBids[0].bidder;
+      try {
+        bid.bidderCode = requestBids[0].bidder;
+      } catch (error) {}
 
       if (responseBid.hasOwnProperty('price') && responseBid.hasOwnProperty('adm')) {
         //assign properties from the response to the bid object

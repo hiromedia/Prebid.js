@@ -41,7 +41,14 @@ function getBidders(bid) {
 }
 
 function bidsBackAdUnit(adUnitCode) {
-  const requested = $$PREBID_GLOBAL$$.adUnits.find(unit => unit.code === adUnitCode).bids.length;
+  let requested;
+  try {
+    requested = $$PREBID_GLOBAL$$.adUnits.find(unit => unit.code === adUnitCode).bids.length;
+  }
+  catch (error) {
+    utils.logError('bidsBackAdUnit' + error);
+  }
+
   const received = $$PREBID_GLOBAL$$._bidsReceived.filter(bid => bid.adUnitCode === adUnitCode).length;
   return requested === received;
 }
